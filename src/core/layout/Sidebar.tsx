@@ -1,23 +1,33 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  FiHome, 
-  FiTruck, 
-  FiUsers, 
-  FiBriefcase, 
+import {
+  FiHome,
+  FiTruck,
+  FiUsers,
+  FiBriefcase,
   FiShoppingCart,
-  FiBox 
+  FiBox,
+  FiSun,
+  FiMoon
 } from 'react-icons/fi';
 import logoImg from '../../assets/logo.png';
 import './Sidebar.css';
 
 export default function Sidebar() {
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <FiHome /> },
     { path: '/machinery', label: 'Maquinarias', icon: <FiBox /> },
-    { path: '/imports', label: 'Importaciones', icon: <FiTruck /> },
-    { path: '/suppliers', label: 'Proveedores', icon: <FiBriefcase /> },
-    { path: '/clients', label: 'Clientes', icon: <FiUsers /> },
-    { path: '/orders', label: 'Pedidos', icon: <FiShoppingCart /> },
+
   ];
 
   return (
@@ -26,13 +36,13 @@ export default function Sidebar() {
         <img src={logoImg} alt="P&M S.A.C Logo" className="company-logo" />
         <span className="logo-text">Importaciones</span>
       </div>
-      
+
       <nav className="sidebar-nav">
         <ul>
           {navItems.map((item) => (
             <li key={item.path}>
-              <NavLink 
-                to={item.path} 
+              <NavLink
+                to={item.path}
                 className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
               >
                 <span className="icon">{item.icon}</span>
@@ -50,6 +60,13 @@ export default function Sidebar() {
             <p className="name">Admin User</p>
             <p className="role">Administrador</p>
           </div>
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            title={theme === 'light' ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
+          >
+            {theme === 'light' ? <FiMoon /> : <FiSun />}
+          </button>
         </div>
       </div>
     </aside>

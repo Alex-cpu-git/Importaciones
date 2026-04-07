@@ -1,0 +1,130 @@
+.orders-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.order-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.order-card-body {
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.order-product {
+  font-size: 1.15rem;
+  margin-bottom: 0.25rem;
+  color: var(--color-text-main);
+}
+
+.order-id {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.order-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--color-bg-surface-hover);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-main);
+}
+
+.detail-value.highlighted {
+  color: var(--color-accent-green);
+  font-weight: 600;
+}
+
+.order-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.specs-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.specs-content {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  background-color: var(--color-bg-base); /* Used to be rgba */
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  white-space: pre-wrap;
+  font-family: inherit;
+  margin: 0;
+  border: 1px solid var(--color-border);
+}
+
+/* Status Colors */
+.status-cotizando {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.status-aprobado {
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.status-transito {
+  background-color: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.status-entregado {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}

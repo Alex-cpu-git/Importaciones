@@ -34,6 +34,12 @@ export default function MachineryList() {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
   };
 
+  const handleShareWhatsApp = (machine: Machine) => {
+    const text = `🚜 *Catálogo de Maquinarias* 🚜\n\n*Modelo:* ${machine.name}\n*Marca:* ${machine.brand}\n*Año:* ${machine.year}\n*Precio Ref:* ${formatPrice(machine.price)}\n*Estado:* ${machine.status}\n\n¿Te interesa este equipo? Déjanos un mensaje para enviarte más detalles.`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <div className="machinery-container">
       <header className="page-header flex-header">
@@ -56,59 +62,55 @@ export default function MachineryList() {
         </button>
       </div>
 
-      <div className="table-container glass">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th style={{ width: '60px' }}>Img</th>
-              <th>Modelo / ID</th>
-              <th>Marca & Tipo</th>
-              <th>Stock</th>
-              <th>Estado</th>
-              <th>Precio Ref.</th>
-              <th style={{ textAlign: 'center' }}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {machinery.map(item => (
-              <tr key={item.id}>
-                <td>
-                  <div className="table-img-container">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.name} className="table-img" />
-                    ) : (
-                      <div className="table-img-placeholder"><FiImage /></div>
-                    )}
-                  </div>
-                </td>
-                <td>
-                  <div className="machine-name">{item.name}</div>
-                  <div className="machine-id">{item.id} - {item.year}</div>
-                </td>
-                <td>
-                  <div className="machine-brand">{item.brand}</div>
-                  <div className="machine-type">{item.type}</div>
-                </td>
-                <td>
-                  <strong className={item.stock > 0 ? "stock-positive" : "stock-empty"}>
-                    {item.stock} unds.
-                  </strong>
-                </td>
-                <td>
-                  <span className={`badge status-${item.status.toLowerCase().replace(' ', '')}`}>
-                    {item.status}
+      <div className="machine-grid">
+        {machinery.map(item => (
+          <div className="machine-card glass" key={item.id}>
+            <div className="machine-card-img-wrapper">
+              {item.imageUrl ? (
+                <img src={item.imageUrl} alt={item.name} className="machine-card-img" />
+              ) : (
+                <div className="machine-card-img-placeholder"><FiImage size={40} /></div>
+              )}
+              <span className={`badge status-${item.status.toLowerCase().replace(' ', '')} floating-badge`}>
+                {item.status}
+              </span>
+            </div>
+            
+            <div className="machine-card-content">
+              <div className="machine-card-header">
+                <h3 className="machine-name">{item.name}</h3>
+                <span className="machine-brand">{item.brand} • {item.year}</span>
+              </div>
+              
+              <div className="machine-card-price">
+                {formatPrice(item.price)}
+              </div>
+              
+              <div className="machine-card-details">
+                <div className="machine-detail">
+                  <span className="detail-label">ID / Tipo</span>
+                  <span className="detail-val">{item.id} • {item.type}</span>
+                </div>
+                <div className="machine-detail">
+                  <span className="detail-label">Unidades en Stock</span>
+                  <span className={`detail-val ${item.stock > 0 ? "stock-positive" : "stock-empty"}`}>
+                    {item.stock}
                   </span>
-                </td>
-                <td><strong>{formatPrice(item.price)}</strong></td>
-                <td style={{ textAlign: 'center' }}>
-                  <button className="btn-icon" onClick={() => handleOpenModal(item)} title="Editar">
-                    <FiEdit2 />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="machine-card-footer">
+              <button className="btn-icon" onClick={() => handleOpenModal(item)} title="Editar" style={{ flex: 1, backgroundColor: 'var(--color-bg-surface-hover)' }}>
+                <FiEdit2 size={16} style={{marginRight: '6px'}} /> Editar
+              </button>
+              <button className="btn-icon btn-whatsapp" onClick={() => handleShareWhatsApp(item)} title="Compartir a WhatsApp">
+                <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '6px'}}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                Compartir
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
       <MachineryModal 
