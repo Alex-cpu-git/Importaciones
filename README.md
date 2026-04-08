@@ -1,73 +1,29 @@
-# React + TypeScript + Vite
+# Maquinarias P&M - Sistema de Administración
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema web de administración para **Maquinarias P&M S.A.C.**, diseñado para la gestión centralizada de inventario industrial, cotizaciones y clientes.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías
+- **React 19** + **TypeScript**
+- **Vite** (Build Tool)
+- **React Router Dom** (Navegación)
+- **Vanilla CSS** (Premium Design System)
+- **Architecture**: Screaming Architecture (Modular y Escalable)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🎨 Características de Diseño
+- Interfaz moderna e industrial basada en el sistema Blue & Gold.
+- Layout completamente responsive (Móvil, Tablet, Escritorio).
+- Navegación dinámica con Sidebar corporativo.
+- Componentes de alta fidelidad con micro-animaciones.
 
-## React Compiler
+## 📁 Estructura del Proyecto
+- `src/features`: Módulos del negocio (Dashboard, Inventory, etc.)
+- `src/layouts`: Estructura base del panel administrativo.
+- `src/assets`: Recursos visuales y logotipos.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Instalación y Desarrollo
+1. Clonar el repositorio.
+2. Ejecutar `npm install` para instalar dependencias.
+3. Ejecutar `npm run dev` para iniciar el servidor de desarrollo.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+**Maquinarias P&M S.A.C.** - Importaciones Directas.
