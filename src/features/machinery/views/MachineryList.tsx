@@ -1,45 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiPlus, FiEdit2, FiImage, FiEye, FiTrash2, FiTag, FiLayers, FiBox } from 'react-icons/fi';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
+import { ref, deleteObject } from 'firebase/storage';
+import { db, storage } from '../../../core/firebase/config';
 import type { Machine } from '../types';
 import MachineryModal from '../components/MachineryModal';
 import MachineDetailModal from '../components/MachineDetailModal';
 import './MachineryList.css';
 
-const INITIAL_DATA: Machine[] = [
-  { id: 'MQ-001', name: 'Excavadora Cat 320', brand: 'Caterpillar', type: 'Excavadora', year: 2022, status: 'En Stock', price: 120000, stock: 2, imageUrl: 'https://images.unsplash.com/photo-1549247654-e69213dccee3?w=300&auto=format&fit=crop&q=60' },
-  { id: 'MQ-002', name: 'Retroexcavadora 310L', brand: 'John Deere', type: 'Retroexcavadora', year: 2021, status: 'Importación', price: 85000, stock: 5 },
-  { id: 'MQ-003', name: 'Cargador Frontal WA380', brand: 'Komatsu', type: 'Cargador', year: 2023, status: 'Reservado', price: 150000, stock: 0 },
-];
-
 export default function MachineryList() {
-  const [machinery, setMachinery] = useState<Machine[]>(INITIAL_DATA);
+  const [machinery, setMachinery] = useState<Machine[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null);
   const [viewingMachine, setViewingMachine] = useState<Machine | null>(null);
+
+  useEffect(() => {
+    // Escuchar cambios en la base de datos de Firebase en tiempo real
+    const q = query(collection(db, 'machines'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Machine));
+      setMachinery(data);
+      setIsLoading(false);
+      setFirebaseError(null); // Clear errors if successful
+    }, (error: any) => {
+      console.error("Error cargando inventario de Firebase:", error);
+      setFirebaseError(error.message || "Error al conectar a Firebase. Revisa los permisos.");
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleOpenModal = (machine: Machine | null = null) => {
     setEditingMachine(machine);
     setIsModalOpen(true);
   };
 
-  const handleSaveMachine = (savedMachine: Machine) => {
-    setMachinery(prev => {
-      const exists = prev.find(m => m.id === savedMachine.id);
-      if (exists) {
-        return prev.map(m => m.id === savedMachine.id ? savedMachine : m);
+  const handleSaveMachine = async (savedMachine: Machine) => {
+    try {
+      if (editingMachine) {
+        // Actualizar máquina existente
+        await setDoc(doc(db, 'machines', savedMachine.id), { 
+          ...savedMachine, 
+          updatedAt: serverTimestamp() 
+        }, { merge: true });
+      } else {
+        // Crear máquina nueva
+        await setDoc(doc(db, 'machines', savedMachine.id), { 
+          ...savedMachine, 
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
       }
-      return [savedMachine, ...prev];
-    });
-  };
-
-  const handleDeleteMachine = (id: string) => {
-    if (window.confirm('🚨 ¿Estás seguro que deseas eliminar permanentemente esta máquina?\n\nEsta acción de administrador no se puede deshacer.')) {
-      setMachinery(prev => prev.filter(m => m.id !== id));
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error al guardar en Firebase:", error);
+      alert("Hubo un error al guardar la máquina en la nube.");
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
+  const handleDeleteMachine = async (id: string, imageUrl?: string) => {
+    if (window.confirm('🚨 ¿Estás seguro que deseas eliminar permanentemente esta máquina?\n\nEsta acción de administrador no se puede deshacer y se borrará de la nube.')) {
+      try {
+        await deleteDoc(doc(db, 'machines', id));
+        
+        if (imageUrl && imageUrl.includes('firebasestorage.googleapis.com')) {
+          try {
+            const imageRef = ref(storage, imageUrl);
+            await deleteObject(imageRef);
+          } catch (storageError) {
+            console.error("Máquina eliminada, pero la imagen falló al borrarse:", storageError);
+          }
+        }
+      } catch (error) {
+        console.error("Error eliminando máquina de Firebase:", error);
+      }
+    }
   };
 
   return (
@@ -64,6 +102,16 @@ export default function MachineryList() {
         </button>
       </div>
 
+      {firebaseError && (
+        <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '1rem', borderRadius: '12px', margin: '1rem 0', border: '1px solid #f87171' }}>
+          <strong>⚠️ Atención: Firebase ha denegado la conexión.</strong>
+          <p style={{ marginTop: '0.5rem', fontFamily: 'monospace' }}>{firebaseError}</p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+            Posible Solución: Ve a tu Consola de Firebase &rarr; Firestore Database &rarr; Reglas (Rules), y cambia la regla a: <strong>allow read, write: if true;</strong>
+          </p>
+        </div>
+      )}
+
       <div className="machine-grid">
         {machinery.map(item => (
           <div className="machine-card glass" key={item.id} onClick={() => setViewingMachine(item)}>
@@ -82,10 +130,6 @@ export default function MachineryList() {
               <div className="machine-card-header">
                 <h3 className="machine-name">{item.name}</h3>
                 <span className="machine-brand">{item.brand} • {item.year}</span>
-              </div>
-              
-              <div className="machine-card-price">
-                {formatPrice(item.price)}
               </div>
               
               <div className="machine-card-details">
@@ -116,7 +160,7 @@ export default function MachineryList() {
                 <button className="btn-fast edit" onClick={(e) => { e.stopPropagation(); handleOpenModal(item); }} title="Editar información">
                   <FiEdit2 size={18} /> <span>Editar</span>
                 </button>
-                <button className="btn-fast delete" onClick={(e) => { e.stopPropagation(); handleDeleteMachine(item.id); }} title="Eliminar registro">
+                <button className="btn-fast delete" onClick={(e) => { e.stopPropagation(); handleDeleteMachine(item.id, item.imageUrl); }} title="Eliminar registro">
                   <FiTrash2 size={18} /> <span>Borrar</span>
                 </button>
               </div>

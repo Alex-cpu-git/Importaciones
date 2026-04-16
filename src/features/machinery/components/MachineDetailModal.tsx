@@ -12,9 +12,6 @@ interface MachineDetailModalProps {
 export default function MachineDetailModal({ isOpen, onClose, machine }: MachineDetailModalProps) {
   if (!isOpen || !machine) return null;
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
-  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -39,10 +36,6 @@ export default function MachineDetailModal({ isOpen, onClose, machine }: Machine
           <div className="detail-header">
             <h4>{machine.brand} • {machine.year}</h4>
             <h2>{machine.name}</h2>
-            <div className="detail-price-wrapper">
-              <span className="price-label">Precio Referencial</span>
-              <span className="detail-price-tag">{formatPrice(machine.price)}</span>
-            </div>
           </div>
 
           <div className="detail-grid">

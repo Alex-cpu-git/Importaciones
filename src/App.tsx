@@ -1,13 +1,27 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './core/layout/Layout';
 import Dashboard from './features/dashboard/views/Dashboard';
 import MachineryList from './features/machinery/views/MachineryList';
 import OrdersView from './features/orders/views/OrdersView';
+import Login from './features/auth/views/Login';
+
+// A simple wrapper to protect routes
+function RequireAuth({ children }: { children: JSX.Element }) {
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  return children;
+}
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
+      <Route path="/login" element={<Login />} />
+      
+      <Route path="/" element={<RequireAuth><Layout /></RequireAuth>}>
         {/* Vista principal */}
         <Route index element={<Navigate to="/dashboard" replace />} />
         

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FiX, FiUploadCloud } from 'react-icons/fi';
+import { FiX, FiUploadCloud, FiLoader } from 'react-icons/fi';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../../../core/firebase/config';
 import type { Machine } from '../types';
 import './MachineryModal.css';
 
@@ -11,6 +13,7 @@ interface MachineryModalProps {
 }
 
 export default function MachineryModal({ isOpen, onClose, machine, onSave }: MachineryModalProps) {
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState<Machine>({
     id: '',
     name: '',
@@ -51,12 +54,22 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Simulating image upload by creating a local object URL
-      const imageUrl = URL.createObjectURL(file);
-      setFormData(prev => ({ ...prev, imageUrl }));
+      try {
+        setIsUploading(true);
+        // Upload immediately to storage
+        const storageRef = ref(storage, `machinery/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+        setFormData(prev => ({ ...prev, imageUrl: downloadUrl }));
+      } catch (error) {
+        console.error("Error subiendo la foto a Firebase:", error);
+        alert("Ocurrió un error bloqueando la subida de la imagen. Verifica que publicaste las reglas del Storage correctamente en la consola.");
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
@@ -73,10 +86,16 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
           <h2>{machine ? 'Editar Máquina' : 'Nueva Máquina'}</h2>
           <button className="close-btn" onClick={onClose}><FiX /></button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-row image-upload-row">
-            <div className="image-preview">
+            <div className="image-preview" style={{ position: 'relative' }}>
+              {isUploading ? (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', borderRadius: '12px' }}>
+                  <FiLoader size={24} className="spin" style={{ animation: 'spin 1.5s linear infinite' }} />
+                  <span style={{ marginTop: '0.5rem', fontSize: '0.8rem', fontWeight: 600 }}>Cargando foto...</span>
+                </div>
+              ) : null}
               {formData.imageUrl ? (
                 <img src={formData.imageUrl} alt="Vista previa" />
               ) : (
@@ -103,7 +122,7 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
 
           <div className="form-row">
             <div className="form-group">
-              <label>Tipo (Excavadora, Cargador...)</label>
+              <label>Tipo </label>
               <input type="text" name="type" value={formData.type} onChange={handleChange} required />
             </div>
             <div className="form-group">
@@ -118,13 +137,6 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
               <input type="number" name="stock" value={formData.stock} onChange={handleChange} required min="0" />
             </div>
             <div className="form-group">
-              <label>Precio de Referencia ($)</label>
-              <input type="number" name="price" value={formData.price} onChange={handleChange} required min="0" />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group" style={{ width: '50%' }}>
               <label>Estado</label>
               <select name="status" value={formData.status} onChange={handleChange}>
                 <option value="En Stock">En Stock</option>
@@ -137,23 +149,23 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
           <div className="features-section">
             <div className="features-header">
               <h3>Características Adicionales (Opcional)</h3>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn-add-feature"
-                onClick={() => setFormData(prev => ({ 
-                  ...prev, 
-                  features: [...(prev.features || []), { key: '', value: '' }] 
+                onClick={() => setFormData(prev => ({
+                  ...prev,
+                  features: [...(prev.features || []), { key: '', value: '' }]
                 }))}
               >
                 + Agregar Característica
               </button>
             </div>
-            
+
             <div className="features-list">
               {formData.features?.map((feature, index) => (
                 <div className="feature-row" key={index}>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Ej: Motor, Capacidad, Tracción..."
                     value={feature.key}
                     onChange={(e) => {
@@ -163,8 +175,8 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
                     }}
                     required
                   />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Ej: V8 400HP, 3m³, 4x4..."
                     value={feature.value}
                     onChange={(e) => {
@@ -174,8 +186,8 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
                     }}
                     required
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     className="btn-remove-feature"
                     title="Eliminar característica"
                     onClick={() => {
@@ -187,7 +199,7 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
                   </button>
                 </div>
               ))}
-              
+
               {(!formData.features || formData.features.length === 0) && (
                 <div className="empty-features-msg">
                   No hay características adicionales. Haz clic en "Agregar Característica" para añadir especificaciones técnicas.
@@ -197,8 +209,10 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>Cancelar</button>
-            <button type="submit" className="btn-primary">Guardar Máquina</button>
+            <button type="button" className="btn-secondary" onClick={onClose} disabled={isUploading}>Cancelar</button>
+            <button type="submit" className="btn-primary" disabled={isUploading}>
+              {isUploading ? 'Procesando...' : 'Guardar Máquina'}
+            </button>
           </div>
         </form>
       </div>

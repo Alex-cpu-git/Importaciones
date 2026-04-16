@@ -8,9 +8,10 @@ import {
   FiShoppingCart,
   FiBox,
   FiSun,
-  FiMoon
+  FiMoon,
+  FiLogOut
 } from 'react-icons/fi';
-import logoImg from '../../assets/logo.png';
+import logoImg from '../../assets/logo1.png';
 import './Sidebar.css';
 
 export default function Sidebar() {
@@ -25,7 +26,7 @@ export default function Sidebar() {
   };
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: <FiHome /> },
+    { path: '/dashboard', label: 'Panel Principal', icon: <FiHome /> },
     { path: '/machinery', label: 'Maquinarias', icon: <FiBox /> },
 
   ];
@@ -34,7 +35,10 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-header logo-container">
         <img src={logoImg} alt="P&M S.A.C Logo" className="company-logo" />
-        <span className="logo-text">Importaciones</span>
+        <div className="logo-text">
+          <span>IMPORTACIONES</span>
+          <span className="logo-highlight">P&amp;M S.A.C.</span>
+        </div>
       </div>
 
       <nav className="sidebar-nav">
@@ -57,7 +61,7 @@ export default function Sidebar() {
         <div className="user-profile">
           <div className="avatar">A</div>
           <div className="user-info">
-            <p className="name">Admin User</p>
+            <p className="name">Admin P&amp;M</p>
             <p className="role">Administrador</p>
           </div>
           <button
@@ -66,6 +70,17 @@ export default function Sidebar() {
             title={theme === 'light' ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
           >
             {theme === 'light' ? <FiMoon /> : <FiSun />}
+          </button>
+          <button
+            className="theme-toggle"
+            style={{ marginLeft: '8px', color: '#ef4444' }}
+            onClick={() => {
+              localStorage.removeItem('isAuthenticated');
+              window.location.href = '/login';
+            }}
+            title="Cerrar Sesión"
+          >
+            <FiLogOut />
           </button>
         </div>
       </div>
