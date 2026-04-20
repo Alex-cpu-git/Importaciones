@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FiHome,
   FiBox,
@@ -11,6 +11,7 @@ import logoImg from '../../assets/logo1.png';
 import './Sidebar.css';
 
 export default function Sidebar() {
+  const navigate = useNavigate();
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function Sidebar() {
             style={{ marginLeft: '8px', color: '#ef4444' }}
             onClick={() => {
               localStorage.removeItem('isAuthenticated');
-              window.location.href = '/login';
+              navigate('/login');
             }}
             title="Cerrar Sesión"
           >
