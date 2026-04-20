@@ -1,4 +1,3 @@
-import React from 'react';
 import { FiX, FiTag, FiLayers, FiActivity, FiImage } from 'react-icons/fi';
 import type { Machine } from '../types';
 import './MachineDetailModal.css';

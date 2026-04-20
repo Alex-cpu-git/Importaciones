@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiPlus, FiEdit2, FiImage, FiEye, FiTrash2, FiTag, FiLayers, FiBox } from 'react-icons/fi';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
@@ -10,7 +10,6 @@ import './MachineryList.css';
 
 export default function MachineryList() {
   const [machinery, setMachinery] = useState<Machine[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [firebaseError, setFirebaseError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null);
@@ -22,12 +21,10 @@ export default function MachineryList() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Machine));
       setMachinery(data);
-      setIsLoading(false);
       setFirebaseError(null); // Clear errors if successful
     }, (error: any) => {
       console.error("Error cargando inventario de Firebase:", error);
       setFirebaseError(error.message || "Error al conectar a Firebase. Revisa los permisos.");
-      setIsLoading(false);
     });
 
     return () => unsubscribe();

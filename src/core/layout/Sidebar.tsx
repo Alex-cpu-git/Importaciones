@@ -2,10 +2,6 @@ import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   FiHome,
-  FiTruck,
-  FiUsers,
-  FiBriefcase,
-  FiShoppingCart,
   FiBox,
   FiSun,
   FiMoon,

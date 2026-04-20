@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './core/layout/Layout';
 import Dashboard from './features/dashboard/views/Dashboard';
@@ -6,7 +7,7 @@ import OrdersView from './features/orders/views/OrdersView';
 import Login from './features/auth/views/Login';
 
 // A simple wrapper to protect routes
-function RequireAuth({ children }: { children: JSX.Element }) {
+function RequireAuth({ children }: { children: ReactNode }) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const location = useLocation();
 

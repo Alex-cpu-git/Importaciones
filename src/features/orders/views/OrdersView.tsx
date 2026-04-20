@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FiSearch, FiFilter, FiPlus, FiEdit2, FiFileText } from 'react-icons/fi';
 import type { Order } from '../types';
 import OrderModal from '../components/OrderModal';
