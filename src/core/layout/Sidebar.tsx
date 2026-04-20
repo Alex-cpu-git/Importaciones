@@ -34,7 +34,7 @@ export default function Sidebar() {
         <img src={logoImg} alt="P&M S.A.C Logo" className="company-logo" />
         <div className="logo-text">
           <span>IMPORTACIONES</span>
-          <span className="logo-highlight">P&amp;M S.A.C.</span>
+          <span className="logo-highlight">P&M S.A.C.</span>
         </div>
       </div>
 
