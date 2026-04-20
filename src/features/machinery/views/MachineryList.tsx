@@ -58,17 +58,21 @@ export default function MachineryList() {
     }
   };
 
-  const handleDeleteMachine = async (id: string, imageUrl?: string) => {
+  const handleDeleteMachine = async (item: Machine) => {
     if (window.confirm('🚨 ¿Estás seguro que deseas eliminar permanentemente esta máquina?\n\nEsta acción de administrador no se puede deshacer y se borrará de la nube.')) {
       try {
-        await deleteDoc(doc(db, 'machines', id));
+        await deleteDoc(doc(db, 'machines', item.id));
         
-        if (imageUrl && imageUrl.includes('firebasestorage.googleapis.com')) {
-          try {
-            const imageRef = ref(storage, imageUrl);
-            await deleteObject(imageRef);
-          } catch (storageError) {
-            console.error("Máquina eliminada, pero la imagen falló al borrarse:", storageError);
+        const urlsToDelete = item.imageUrls?.length ? item.imageUrls : (item.imageUrl ? [item.imageUrl] : []);
+        
+        for (const url of urlsToDelete) {
+          if (url && url.includes('firebasestorage.googleapis.com')) {
+            try {
+              const imageRef = ref(storage, url);
+              await deleteObject(imageRef);
+            } catch (storageError) {
+              console.error(`Imagen falló al borrarse (${url}):`, storageError);
+            }
           }
         }
       } catch (error) {
@@ -157,7 +161,7 @@ export default function MachineryList() {
                 <button className="btn-fast edit" onClick={(e) => { e.stopPropagation(); handleOpenModal(item); }} title="Editar información">
                   <FiEdit2 size={18} /> <span>Editar</span>
                 </button>
-                <button className="btn-fast delete" onClick={(e) => { e.stopPropagation(); handleDeleteMachine(item.id, item.imageUrl); }} title="Eliminar registro">
+                <button className="btn-fast delete" onClick={(e) => { e.stopPropagation(); handleDeleteMachine(item); }} title="Eliminar registro">
                   <FiTrash2 size={18} /> <span>Borrar</span>
                 </button>
               </div>

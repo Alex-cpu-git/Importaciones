@@ -18,7 +18,13 @@ export default function MachineDetailModal({ isOpen, onClose, machine }: Machine
         <button className="detail-close" onClick={onClose} title="Cerrar Detalles"><FiX size={24} /></button>
         
         <div className="detail-banner">
-          {machine.imageUrl ? (
+          {machine.imageUrls && machine.imageUrls.length > 0 ? (
+            <div className="detail-gallery" style={{ display: 'flex', overflowX: 'auto', gap: '8px', padding: '16px', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
+              {machine.imageUrls.map((url, idx) => (
+                <img key={idx} src={url} alt={`${machine.name} - Imagen ${idx + 1}`} style={{ height: '240px', minWidth: '80%', objectFit: 'cover', borderRadius: '8px', scrollSnapAlign: 'center', flexShrink: 0, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+              ))}
+            </div>
+          ) : machine.imageUrl ? (
             <img src={machine.imageUrl} alt={machine.name} />
           ) : (
             <div className="detail-no-image">

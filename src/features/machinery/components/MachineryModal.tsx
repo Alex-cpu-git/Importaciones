@@ -24,11 +24,15 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
     price: 0,
     stock: 0,
     imageUrl: '',
+    imageUrls: [],
   });
 
   useEffect(() => {
     if (machine) {
-      setFormData(machine);
+      setFormData({
+        ...machine,
+        imageUrls: machine.imageUrls || (machine.imageUrl ? [machine.imageUrl] : []),
+      });
     } else {
       setFormData({
         id: `MQ-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
@@ -40,6 +44,7 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
         price: 0,
         stock: 0,
         imageUrl: '',
+        imageUrls: [],
       });
     }
   }, [machine, isOpen]);
@@ -55,22 +60,43 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
       try {
         setIsUploading(true);
-        // Upload immediately to storage
-        const storageRef = ref(storage, `machinery/${Date.now()}_${file.name}`);
-        await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(storageRef);
-        setFormData(prev => ({ ...prev, imageUrl: downloadUrl }));
+        const uploadPromises = files.map(async (file) => {
+          const storageRef = ref(storage, `machinery/${Date.now()}_${file.name}`);
+          await uploadBytes(storageRef, file);
+          return await getDownloadURL(storageRef);
+        });
+        const urlArray = await Promise.all(uploadPromises);
+        
+        setFormData(prev => {
+          const newUrls = [...(prev.imageUrls || []), ...urlArray];
+          return {
+            ...prev,
+            imageUrl: prev.imageUrl || newUrls[0],
+            imageUrls: newUrls
+          };
+        });
       } catch (error) {
-        console.error("Error subiendo la foto a Firebase:", error);
-        alert("Ocurrió un error bloqueando la subida de la imagen. Verifica que publicaste las reglas del Storage correctamente en la consola.");
+        console.error("Error subiendo las fotos a Firebase:", error);
+        alert("Ocurrió un error al subir las imágenes.");
       } finally {
         setIsUploading(false);
       }
     }
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    setFormData(prev => {
+      const newUrls = (prev.imageUrls || []).filter((_, i) => i !== indexToRemove);
+      return {
+        ...prev,
+        imageUrl: newUrls.length > 0 ? newUrls[0] : '',
+        imageUrls: newUrls
+      };
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,22 +115,30 @@ export default function MachineryModal({ isOpen, onClose, machine, onSave }: Mac
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-row image-upload-row">
-            <div className="image-preview" style={{ position: 'relative' }}>
-              {isUploading ? (
-                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', borderRadius: '12px' }}>
-                  <FiLoader size={24} className="spin" style={{ animation: 'spin 1.5s linear infinite' }} />
-                  <span style={{ marginTop: '0.5rem', fontSize: '0.8rem', fontWeight: 600 }}>Cargando foto...</span>
+            <div className="image-preview-container" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', minWidth: '100px' }}>
+              {isUploading && (
+                <div className="image-preview" style={{ position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)', color: 'white', borderRadius: '12px' }}>
+                    <FiLoader size={24} className="spin" style={{ animation: 'spin 1.5s linear infinite' }} />
+                  </div>
+                </div>
+              )}
+              {(formData.imageUrls && formData.imageUrls.length > 0) ? (
+                formData.imageUrls.map((url, i) => (
+                  <div key={i} className="image-preview" style={{ position: 'relative' }}>
+                    <img src={url} alt={`Preview ${i}`} />
+                    <button type="button" onClick={() => removeImage(i)} style={{ position: 'absolute', top: '-5px', right: '-5px', background: '#ef4444', color: 'white', borderRadius: '50%', width: '22px', height: '22px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', zIndex: 10 }}>&times;</button>
+                  </div>
+                ))
+              ) : !isUploading ? (
+                <div className="image-preview">
+                  <div className="placeholder-image"><FiUploadCloud size={32} /></div>
                 </div>
               ) : null}
-              {formData.imageUrl ? (
-                <img src={formData.imageUrl} alt="Vista previa" />
-              ) : (
-                <div className="placeholder-image"><FiUploadCloud size={32} /></div>
-              )}
             </div>
             <div className="form-group flex-1">
-              <label>Imagen del Equipo</label>
-              <input type="file" accept="image/*" onChange={handleImageChange} className="file-input" />
+              <label>Imágenes del Equipo (puedes elegir varias)</label>
+              <input type="file" accept="image/*" multiple onChange={handleImageChange} className="file-input" />
               <small>Formatos soportados: JPG, PNG, WEBP.</small>
             </div>
           </div>

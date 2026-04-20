@@ -8,6 +8,7 @@ export interface Machine {
   price: number;
   stock: number;
   imageUrl?: string;
+  imageUrls?: string[];
   features?: { key: string; value: string }[];
   createdAt?: any;
   updatedAt?: any;
