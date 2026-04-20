@@ -7,7 +7,7 @@ import {
   FiMoon,
   FiLogOut
 } from 'react-icons/fi';
-import logoImg from '../../assets/logo1.png';
+const logoImg = '/logo1.png';
 import './Sidebar.css';
 
 export default function Sidebar() {
@@ -58,7 +58,7 @@ export default function Sidebar() {
         <div className="user-profile">
           <div className="avatar">A</div>
           <div className="user-info">
-            <p className="name">Admin P&amp;M</p>
+            <p className="name">Admin P&M</p>
             <p className="role">Administrador</p>
           </div>
           <button
